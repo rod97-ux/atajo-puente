@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Abrir Nike</title>
+<style>body{font-family:-apple-system,sans-serif;background:#111;color:#eee;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;text-align:center}a{display:block;background:#2ecc71;color:#000;font-size:28px;font-weight:700;padding:28px 40px;border-radius:18px;text-decoration:none}p{opacity:.7}</style>
+</head><body><div><p id="m">Abriendo Nike...</p><a id="b" href="#" style="display:none">Abrir Nike</a></div>
+<script>
+// Salto DIRECTO a Nike (sin Atajos). Cada carga genera un id NUEVO (Date.now): URL nunca visitada
+// -> pagina fresca sin cache. En Safari se redirige normal; en otro navegador se fuerza Safari
+// con x-safari-https, porque el script (Userscripts) solo corre en Safari.
+// s=<SKU> -> GENERAL (/mx/t/_/<SKU>)   l=<slug> -> SNKRS (/mx/launch/t/<slug>)   t=<talla> (opcional).
+// Exactamente UNO de s / l; cada uno con una lista cerrada de caracteres: solo puede ir a nike.com/mx.
+var q=new URLSearchParams(location.search),s=q.get("s")||"",l=q.get("l")||"",t=q.get("t")||"";
+var okS=/^[A-Za-z0-9-]{4,20}$/.test(s),okL=/^[a-z0-9-]{3,120}$/.test(l);
+if(((okS&&!l)||(okL&&!s))&&(t===""||/^[A-Za-z0-9.,\/ -]{1,8}$/.test(t))){
+var id=Date.now();
+var path=okL?"/mx/launch/t/"+encodeURIComponent(l):"/mx/t/_/"+encodeURIComponent(s);
+// a = numeros de direccion permitidos: llegan en el FRAGMENTO (#a=...) del enlace del boton, que el
+// navegador NO envia a ningun servidor, y se pasan tal cual al fragmento de Nike. No estan en este archivo.
+var am=/[#&]a=([0-9,]+)/.exec(location.hash),a=(am&&/^\d{3,6}(,\d{3,6}){0,4}$/.test(am[1]))?am[1]:"";
+var nike="https://www.nike.com"+path+"?cb="+id+(t?"#talla="+encodeURIComponent(t)+(a?"&a="+a:""):"");
+var ua=navigator.userAgent;
+var safari=/Safari\//.test(ua)&&!/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo|GSA\//.test(ua);
+var go=safari?nike:"x-safari-"+nike;
+var b=document.getElementById("b");b.href=go;b.textContent=t?"Abrir Nike · "+t:"Abrir Nike";
+location.replace(go);
+setTimeout(function(){b.style.display="block";document.getElementById("m").textContent="¿No abrió?"},4000);
+}else{document.getElementById("m").textContent="Enlace no valido"}
+</script></body></html>
